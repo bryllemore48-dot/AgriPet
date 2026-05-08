@@ -1,0 +1,138 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriPet Store System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="{% static 'store/css/style.css' %}" rel="stylesheet">
+</head>
+
+<body>
+    <div class="dashboard-shell">
+        <aside class="sidebar collapse show d-lg-flex flex-column" id="sidebarMenu">
+            <div class="sidebar-brand mb-5">
+                <div class="brand-icon"><i class="fas fa-paw"></i></div>
+                <div>
+                    <h4>AgriPet</h4>
+                    <p>Management</p>
+                </div>
+            </div>
+            <ul class="sidebar-nav nav flex-column mb-4">
+                <li class="nav-item">
+                    <a class="nav-link{% if request.path == '/' %} active{% endif %}"
+                        href="{% url 'store:dashboard' %}">
+                        <i class="fas fa-tachometer-alt me-3"></i>Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link{% if request.path == '/attendance/' %} active{% endif %}"
+                        href="{% url 'store:attendance_list' %}">
+                        <i class="fas fa-user-check me-3"></i>Staff Attendance
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link{% if request.path == '/report/' %} active{% endif %}"
+                        href="{% url 'store:report_with_proof' %}">
+                        <i class="fas fa-file-alt me-3"></i>Report with Proof
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link{% if request.path == '/settings/' %} active{% endif %}"
+                        href="{% url 'store:user_settings' %}">
+                        <i class="fas fa-cog me-3"></i>Settings
+                    </a>
+                </li>
+            </ul>
+            <div class="sidebar-footer mt-auto text-white fw-bold">
+                <p class="mb-1">Live insights</p>
+                <small>Low stock: <strong>{{ low_stock_count }}</strong></small>
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <header class="topbar d-flex justify-content-between align-items-center px-4 py-3">
+                <div class="topbar-title">
+                    <h6 class="mb-0 text-uppercase">Pet Store Admin</h6>
+                </div>
+                <div class="topbar-actions d-flex gap-2 align-items-center">
+                    <div class="dropdown notification-dropdown" style="position: relative;">
+                        <button class="btn btn-outline-light btn-icon" type="button" id="notificationsToggle"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-bell"></i>
+                            {% if notifications|length %}
+                            <span
+                                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ notifications|length }}</span>
+                            {% endif %}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="notificationsToggle" style="width: auto; min-width: 320px;">
+                            <li class="dropdown-header">Notifications ({{ notifications|length|default:0 }})</li>
+                            {% for note in notifications %}
+                            <li>
+                                <a class="dropdown-item" href="{{ note.link }}">
+                                    <div class="small text-secondary">{{ note.type }}</div>
+                                    {{ note.message }}
+                                </a>
+                            </li>
+                            {% empty %}
+                            <li><span class="dropdown-item text-muted">No notifications</span></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="dropdown" style="position: relative;">
+                        <button class="btn btn-outline-light btn-icon" type="button" id="profileToggle"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            {% if user_profile and user_profile.avatar %}
+                            <img src="{{ user_profile.avatar.url }}" alt="Profile" class="rounded-circle"
+                                style="width:32px; height:32px; object-fit:cover;">
+                            {% else %}
+                            <i class="fas fa-user-circle"></i>
+                            {% endif %}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="profileToggle">
+                            <li><a class="dropdown-item" href="{% url 'store:user_settings' %}"><i
+                                        class="fas fa-cog me-2"></i>Settings</a></li>
+                            <li><a class="dropdown-item" href="{% url 'store:logout' %}"><i
+                                        class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                    <button class="btn btn-outline-light btn-icon d-lg-none" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#sidebarMenu" aria-expanded="false" aria-controls="sidebarMenu">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </header>
+
+            <main class="content-area container-fluid py-5">
+                {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                    <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% block content %}{% endblock %}
+            </main>
+
+            <footer>
+                <div class="container-fluid">
+                    <p class="mb-0">AgriPet Store System · Built for livestock and pet retail management.</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+
+</html>

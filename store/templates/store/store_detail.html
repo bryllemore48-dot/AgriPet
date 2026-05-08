@@ -1,0 +1,251 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h1 class="display-5 fw-bold">{{ store.name }}</h1>
+        {% if is_product_store %}
+        <p class="text-white mb-0">Detailed view for {{ store.name }} with inventory, weekly profit, and stock status.</p>
+        {% else %}
+        <p class="text-white mb-0">Detailed view for {{ store.name }} with service transactions and weekly summary.</p>
+        {% endif %}
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'store:dashboard' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+        {% if is_product_store %}
+        <a href="{% url 'store:inventory_list' %}?store={{ store.id }}" class="btn btn-primary">View inventory list</a>
+        {% endif %}
+        <a href="{% url 'store:store_pdf' store.store_type %}" class="btn btn-success">Download PDF</a>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    {% if is_product_store %}
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase text-secondary mb-3">This Week Profit</h6>
+                <h2 class="display-6 mb-2">₱{{ total_profit_week|floatformat:2 }}</h2>
+                <p class="text-muted mb-0">Completed sales from {{ week_start|date:'M j' }} to {{ today|date:'M j' }}.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase text-secondary mb-3">Stock summary</h6>
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>In stock</span>
+                        <span class="badge-status in-stock">{{ in_stock }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Low stock</span>
+                        <span class="badge-status low-stock">{{ low_stock }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Out of stock</span>
+                        <span class="badge-status out-of-stock">{{ out_of_stock }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase text-secondary mb-3">Inventory count</h6>
+                <h2 class="display-6 mb-2">{{ total_products }}</h2>
+                <p class="text-muted mb-0">Active and archived products in this store.</p>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase text-secondary mb-3">This Week Amount</h6>
+                <h2 class="display-6 mb-2">₱{{ total_amount_week|floatformat:2 }}</h2>
+                <p class="text-muted mb-0">Processed transactions from {{ week_start|date:'M j' }} to {{ today|date:'M j' }}.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase text-secondary mb-3">Transaction summary</h6>
+                <div class="d-flex flex-column gap-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Completed</span>
+                        <span class="badge-status in-stock">{{ completed }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Pending</span>
+                        <span class="badge-status low-stock">{{ pending }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span>Failed</span>
+                        <span class="badge-status out-of-stock">{{ failed }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-uppercase text-secondary mb-3">Total transactions</h6>
+                <h2 class="display-6 mb-2">{{ total_transactions }}</h2>
+                <p class="text-muted mb-0">All service transactions for this store.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-12 col-xl-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-0 py-3">
+                {% if is_product_store %}
+                <h5 class="mb-0">Inventory overview</h5>
+                {% else %}
+                <h5 class="mb-0">Service transactions</h5>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                {% if is_product_store %}
+                                <th>Product</th>
+                                <th>Category</th>
+                                <th>Price</th>
+                                <th>Stock</th>
+                                <th>Status</th>
+                                {% else %}
+                                <th>Type</th>
+                                <th>Reference</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if is_product_store %}
+                            {% for product in products %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.get_category_display }}</td>
+                                <td>₱{{ product.price_per_kilo }} / kg</td>
+                                <td>{{ product.stock_in_sacks }} sacks</td>
+                                <td>
+                                    {% if product.stock_status == 'in_stock' %}
+                                    <span class="badge-status in-stock">{{ product.stock_label }}</span>
+                                    {% elif product.stock_status == 'low_stock' %}
+                                    <span class="badge-status low-stock">{{ product.stock_label }}</span>
+                                    {% else %}
+                                    <span class="badge-status out-of-stock">{{ product.stock_label }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">No products found for this store.</td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            {% for transaction in service_transactions %}
+                            <tr>
+                                <td>{{ transaction.get_transaction_type_display }}</td>
+                                <td>{{ transaction.reference_number }}</td>
+                                <td>{{ transaction.customer_name }}</td>
+                                <td>₱{{ transaction.amount|floatformat:2 }}</td>
+                                <td>
+                                    {% if transaction.status == 'completed' %}
+                                    <span class="badge-status in-stock">{{ transaction.get_status_display }}</span>
+                                    {% elif transaction.status == 'pending' %}
+                                    <span class="badge-status low-stock">{{ transaction.get_status_display }}</span>
+                                    {% else %}
+                                    <span class="badge-status out-of-stock">{{ transaction.get_status_display }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">No transactions found for this store.</td>
+                            </tr>
+                            {% endfor %}
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-xl-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 py-3">
+                {% if is_product_store %}
+                <h5 class="mb-0">Weekly transactions</h5>
+                <p class="text-muted mb-0 small">Showing up to the latest 12 completed orders.</p>
+                {% else %}
+                <h5 class="mb-0">Weekly transactions</h5>
+                <p class="text-muted mb-0 small">Showing up to the latest 12 transactions.</p>
+                {% endif %}
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0 align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                {% if is_product_store %}
+                                <th>Order</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Total</th>
+                                {% else %}
+                                <th>Type</th>
+                                <th>Reference</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if is_product_store %}
+                            {% for order in weekly_orders %}
+                            <tr>
+                                <td>{{ order.order_number }}</td>
+                                <td>{{ order.created_at|date:'M j, Y' }}</td>
+                                <td>{{ order.get_status_display }}</td>
+                                <td>₱{{ order.total_amount|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">No completed orders this week.</td>
+                            </tr>
+                            {% endfor %}
+                            {% else %}
+                            {% for transaction in weekly_transactions %}
+                            <tr>
+                                <td>{{ transaction.get_transaction_type_display }}</td>
+                                <td>{{ transaction.reference_number }}</td>
+                                <td>{{ transaction.created_at|date:'M j, Y' }}</td>
+                                <td>₱{{ transaction.amount|floatformat:2 }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">No transactions this week.</td>
+                            </tr>
+                            {% endfor %}
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,116 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h1 class="fw-bold"><i class="fas fa-user-cog me-2"></i>User Settings</h1>
+        <p class="text-white mb-0">Update your profile, upload your picture, and change your password.</p>
+    </div>
+</div>
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="mb-4">Profile Details</h5>
+                <div class="d-flex align-items-center mb-4">
+                    {% if user_profile.avatar %}
+                    <img src="{{ user_profile.avatar.url }}" alt="Profile Picture" class="rounded-circle me-3"
+                        style="width:96px; height:96px; object-fit:cover;">
+                    {% else %}
+                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center me-3"
+                        style="width:96px; height:96px;">
+                        <i class="fas fa-user fa-2x"></i>
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h6 class="mb-1">{{ request.user.get_full_name|default:request.user.username }}</h6>
+                        <small class="text-muted">{{ request.user.email }}</small>
+                    </div>
+                </div>
+                <form id="profile-form" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ user_form.non_field_errors }}
+                    {{ profile_form.non_field_errors }}
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <button id="edit-profile-btn" type="button" class="btn btn-outline-primary">Edit
+                            Profile</button>
+                        <div>
+                            <button id="save-profile-btn" type="submit" name="save_profile"
+                                class="btn btn-primary d-none">Save Profile</button>
+                            <button id="cancel-edit-btn" type="button" class="btn btn-secondary d-none">Cancel</button>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        {{ user_form.first_name.label_tag }}
+                        {{ user_form.first_name }}
+                    </div>
+                    <div class="mb-3">
+                        {{ user_form.email.label_tag }}
+                        {{ user_form.email }}
+                    </div>
+                    <div id="avatar-field-wrapper" class="mb-3 d-none">
+                        {{ profile_form.avatar.label_tag }}
+                        {{ profile_form.avatar }}
+                    </div>
+                    <div class="mb-3">
+                        {{ profile_form.bio.label_tag }}
+                        {{ profile_form.bio }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="mb-4">Change Password</h5>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ password_form.non_field_errors }}
+                    {% for field in password_form %}
+                    <div class="mb-3">
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.errors %}
+                        <div class="text-danger small">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    <button type="submit" name="change_password" class="btn btn-warning">Update Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const editBtn = document.getElementById('edit-profile-btn');
+        const saveBtn = document.getElementById('save-profile-btn');
+        const cancelBtn = document.getElementById('cancel-edit-btn');
+        const profileForm = document.getElementById('profile-form');
+        const avatarWrapper = document.getElementById('avatar-field-wrapper');
+        const fields = profileForm.querySelectorAll('input, textarea, select');
+
+        function setEditable(editable) {
+            fields.forEach(field => {
+                if (field.name !== 'csrfmiddlewaretoken') {
+                    field.disabled = !editable;
+                }
+            });
+            saveBtn.classList.toggle('d-none', !editable);
+            cancelBtn.classList.toggle('d-none', !editable);
+            editBtn.classList.toggle('d-none', editable);
+        }
+
+        editBtn.addEventListener('click', function () {
+            setEditable(true);
+            avatarWrapper.classList.remove('d-none');
+        });
+
+        cancelBtn.addEventListener('click', function () {
+            window.location.reload();
+        });
+
+        setEditable(false);
+    });
+</script>
+{% endblock %}

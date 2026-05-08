@@ -1,0 +1,85 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<div class="page-header mb-4">
+    <h1 class="fw-bold"><i class="fas fa-shopping-cart me-2"></i>Stores</h1>
+    <p class="text-muted">Browse available items for AgriPet and Cebuana Padala with up-to-date pricing and stock.</p>
+</div>
+
+<!-- Search and Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="search" class="form-label">Search Products</label>
+                <input type="text" class="form-control" id="search" name="search" value="{{ search_query }}"
+                    placeholder="Search by name...">
+            </div>
+            <div class="col-md-3">
+                <label for="category" class="form-label">Category</label>
+                <select class="form-select" id="category" name="category">
+                    <option value="">All Categories</option>
+                    {% for cat_value, cat_label in categories %}
+                    <option value="{{ cat_value }}" {% if selected_category==cat_value %}selected{% endif %}>{{
+                        cat_label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="store" class="form-label">Store</label>
+                <select class="form-select" id="store" name="store">
+                    <option value="">All Stores</option>
+                    {% for store in stores %}
+                    <option value="{{ store.id }}" {% if selected_store==store.id|stringformat:'s' %}selected{% endif
+                        %}>{{ store.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-success w-100">
+                    <i class="fas fa-search me-1"></i>Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Products Grid -->
+<div class="row g-4">
+    {% for product in products %}
+    <div class="col-md-6 col-xl-4">
+        <div class="card product-card h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <span class="badge badge-store">{{ product.store.name }}</span>
+                    <span
+                        class="badge-status {% if product.stock_status == 'in_stock' %}in-stock{% elif product.stock_status == 'low_stock' %}low-stock{% else %}out-of-stock{% endif %}">{{
+                        product.stock_label }}</span>
+                </div>
+                <h5 class="card-title">{{ product.name }}</h5>
+                <p class="text-muted mb-3">{{ product.get_category_display }}</p>
+                {% if product.description %}
+                <p class="text-muted small mb-3">{{ product.description|truncatechars:100 }}</p>
+                {% endif %}
+                <div class="mt-auto">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="h5 mb-0">₱{{ product.price_per_kilo }} / kg</span>
+                        <small class="text-muted">{{ product.stock_in_sacks }} sacks</small>
+                    </div>
+                    <button class="btn btn-outline-secondary btn-sm w-100" disabled>
+                        <i class="fas fa-info-circle me-1"></i>Stores Only
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info text-center">
+            <i class="fas fa-info-circle fa-2x mb-3"></i>
+            <h5>No products found</h5>
+            <p>Try adjusting your search or filter criteria.</p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

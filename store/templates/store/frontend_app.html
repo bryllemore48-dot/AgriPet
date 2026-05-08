@@ -1,0 +1,207 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawPoint Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        integrity="sha512-yHqri+VhBq4/wS4Lk5kQWqmmp3aKz0PwxYfZ2mLZlDRI3icdI2bOR9txMgdZ2f49D1UwjnAIdxqS5F+o7X1j2Q=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{% static 'store/css/frontend.css' %}">
+</head>
+
+<body>
+    <div class="dashboard-shell">
+        <aside class="sidebar">
+            <div class="brand-block">
+                <div class="brand-icon"><i class="fas fa-paw"></i></div>
+                <div>
+                    <h1>PawPoint</h1>
+                    <p>Pet Store Management</p>
+                </div>
+            </div>
+
+            <nav class="nav-list">
+                <button class="nav-item active"><i class="fas fa-house"></i><span>Dashboard</span></button>
+                <button class="nav-item"><i class="fas fa-chart-line"></i><span>Stores</span></button>
+                <button class="nav-item"><i class="fas fa-bags-shopping"></i><span>Orders</span></button>
+                <button class="nav-item"><i class="fas fa-users"></i><span>Customers</span></button>
+                <button class="nav-item"><i class="fas fa-truck"></i><span>Suppliers</span></button>
+                <button class="nav-item"><i class="fas fa-file-alt"></i><span>Reports</span></button>
+            </nav>
+
+            <div class="sidebar-divider"></div>
+
+            <div class="system-block">
+                <p class="system-label">SYSTEM</p>
+                <button class="nav-item"><i class="fas fa-user"></i><span>Users</span></button>
+                <button class="nav-item"><i class="fas fa-cog"></i><span>Settings</span></button>
+                <button class="nav-item"><i class="fas fa-clock"></i><span>Activity Log</span></button>
+                <button class="nav-item"><i class="fas fa-cloud-arrow-up"></i><span>Backup</span></button>
+            </div>
+        </aside>
+
+        <main class="main-panel">
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">Dashboard</p>
+                    <h2>Welcome back, Admin!</h2>
+                    <p class="subtitle">Here's what's happening with your store today.</p>
+                </div>
+                <div class="action-group">
+                    <button class="btn btn-soft"><i class="fas fa-plus"></i> Add Product</button>
+                    <button class="btn btn-primary"><i class="fas fa-receipt"></i> Record Sale</button>
+                    <button class="btn btn-soft"><i class="fas fa-pen"></i> Edit</button>
+                </div>
+            </header>
+
+            <section class="content-grid">
+                <div class="cards-grid">
+                    <article class="stat-card stat-card-orange">
+                        <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+                        <div>
+                            <p>Today's Stores</p>
+                            <h3>₱0.00</h3>
+                            <span class="stat-meta">+12.5% vs yesterday</span>
+                        </div>
+                    </article>
+
+                    <article class="stat-card stat-card-green">
+                        <div class="stat-icon"><i class="fas fa-wallet"></i></div>
+                        <div>
+                            <p>Total Income</p>
+                            <h3>₱83,500.00</h3>
+                            <span class="stat-meta">+18.6% last 7 days</span>
+                        </div>
+                    </article>
+
+                    <article class="stat-card stat-card-yellow">
+                        <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                        <div>
+                            <p>Low Stock Alerts</p>
+                            <h3>1</h3>
+                            <a href="#" class="badge-link">View Items →</a>
+                        </div>
+                    </article>
+
+                    <article class="stat-card stat-card-purple">
+                        <div class="stat-icon"><i class="fas fa-crown"></i></div>
+                        <div>
+                            <p>Top Selling Product</p>
+                            <h3>Kitten Food (5kg)</h3>
+                            <div class="stat-footer">
+                                <span class="stat-meta">Best seller this week</span>
+                                <a href="#" class="badge-link">View Report</a>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="chart-section">
+                    <div class="chart-card chart-card-large">
+                        <div class="card-head">
+                            <h4>Stores Overview</h4>
+                            <span>Last 7 days</span>
+                        </div>
+                        <canvas id="storesLineChart" height="200"></canvas>
+                    </div>
+
+                    <div class="chart-card chart-card-small">
+                        <div class="card-head">
+                            <h4>Stores by Category</h4>
+                        </div>
+                        <canvas id="categoryDonutChart" height="220"></canvas>
+                        <div class="category-legend">
+                            <div><span class="legend-dot legend-dot-blue"></span>Cat Food <strong>40%</strong></div>
+                            <div><span class="legend-dot legend-dot-orange"></span>Dog Food <strong>25%</strong></div>
+                            <div><span class="legend-dot legend-dot-violet"></span>Accessories <strong>15%</strong>
+                            </div>
+                            <div><span class="legend-dot legend-dot-yellow"></span>Treats <strong>10%</strong></div>
+                            <div><span class="legend-dot legend-dot-slate"></span>Others <strong>10%</strong></div>
+                        </div>
+                        <div class="chart-footer">
+                            <a href="#" class="badge-link">View Full Report</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tables-grid">
+                    <div class="table-card">
+                        <div class="table-head">
+                            <h4>Recent Orders</h4>
+                            <button class="btn btn-soft btn-sm">View All Orders</button>
+                        </div>
+                        <div class="table-scroll">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Order ID</th>
+                                        <th>Customer</th>
+                                        <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ordersTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="table-card lowstock-card">
+                        <div class="table-head">
+                            <h4>Low Stock Items</h4>
+                            <button class="btn btn-soft btn-sm">View All</button>
+                        </div>
+                        <div class="table-scroll">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Stock</th>
+                                        <th>Threshold</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="lowStockTable"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <div class="decorations">
+            <div class="paw paw-one"></div>
+            <div class="paw paw-two"></div>
+            <div class="pet-card dog-card">
+                <svg viewBox="0 0 160 160" aria-hidden="true">
+                    <circle cx="80" cy="80" r="80" fill="#fff5ec" />
+                    <path d="M48 88c0-22 18-40 40-40s40 18 40 40c0 16-8 26-16 34s-18 14-24 14-18-6-24-14-16-18-16-34Z"
+                        fill="#f3a85e" />
+                    <path d="M67 64c0-7 5-13 11-13s11 6 11 13-5 13-11 13-11-6-11-13Z" fill="#fff" />
+                    <path d="M84 64c0-7 5-13 11-13s11 6 11 13-5 13-11 13-11-6-11-13Z" fill="#fff" />
+                    <path d="M86 88c0 8-7 15-16 15s-16-7-16-15" stroke="#d37f2c" stroke-width="8"
+                        stroke-linecap="round" />
+                </svg>
+            </div>
+            <div class="pet-card cat-card">
+                <svg viewBox="0 0 160 160" aria-hidden="true">
+                    <circle cx="80" cy="80" r="80" fill="#eef9ff" />
+                    <path d="M72 90c0-13 9-24 20-24s20 11 20 24-9 24-20 24-20-11-20-24Z" fill="#7f92ff" />
+                    <path d="M68 62c0-9 7-16 16-16s16 7 16 16-7 16-16 16-16-7-16-16Z" fill="#fff" />
+                    <path d="M80 86c-4 0-8 3-10 7" stroke="#4d62ff" stroke-width="6" stroke-linecap="round" />
+                    <path d="M92 86c4 0 8 3 10 7" stroke="#4d62ff" stroke-width="6" stroke-linecap="round" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'store/js/app.js' %}"></script>
+</body>
+
+</html>

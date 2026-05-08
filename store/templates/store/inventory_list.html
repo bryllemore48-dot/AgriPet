@@ -1,0 +1,76 @@
+{% extends 'store/base.html' %}
+{% block content %}
+<div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h1 class="fw-bold"><i class="fas fa-boxes me-2"></i>Inventory</h1>
+        <p class="text-white mb-0">
+            <i class="fas fa-info-circle me-1"></i>
+            <span style="font-size: 0.9rem;">This is a shared inventory view accessible to all users. Stock levels update in real-time.</span>
+        </p>
+        <p class="text-white mb-0">Manage product stock, prices, and categories across your stores.</p>
+    </div>
+    <div class="d-flex gap-2 align-items-center w-100 w-md-auto">
+        {% if not current_store_type or current_store_type != 'agripet' %}
+        <form method="get" class="d-flex gap-2 flex-grow-1">
+            <select name="store" class="form-select">
+                <option value="">All Stores</option>
+                {% for store in stores %}
+                <option value="{{ store.id }}" {% if selected_store == store.id %}selected{% endif %}>{{ store.name }}</option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-success px-4">Filter</button>
+        </form>
+        {% endif %}
+        {% if current_store_type == 'agripet' %}
+        <a href="{% url 'store:store_detail' store_type='agripet' %}" class="btn btn-primary">Back to AgriPet Store</a>
+        {% endif %}
+        {% if is_admin %}
+        <a href="/admin/store/product/" class="btn btn-warning" title="Manage inventory in admin panel">
+            <i class="fas fa-cog me-1"></i>Manage
+        </a>
+        {% endif %}
+    </div>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Store</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td><span class="badge badge-store">{{ product.store.name }}</span></td>
+                        <td>{{ product.get_category_display }}</td>
+                        <td>₱{{ product.price_per_kilo }} / kg</td>
+                        <td>{{ product.stock_in_sacks }} sacks</td>
+                        <td>
+                            {% if product.stock_status == 'in_stock' %}
+                            <span class="badge-status in-stock">{{ product.stock_label }}</span>
+                            {% elif product.stock_status == 'low_stock' %}
+                            <span class="badge-status low-stock">{{ product.stock_label }}</span>
+                            {% else %}
+                            <span class="badge-status out-of-stock">{{ product.stock_label }}</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">No products found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

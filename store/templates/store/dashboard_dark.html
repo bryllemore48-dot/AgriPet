@@ -1,0 +1,426 @@
+{% extends 'store/base.html' %}
+{% load static %}
+{% block extra_head %}
+<style>
+    /* Dark Mode Styles */
+    body.dark-mode {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+        color: #e2e8f0;
+        min-height: 100vh;
+    }
+
+    .dark-mode .navbar {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .dark-mode .navbar-brand {
+        color: #00d4aa !important;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-shadow: 0 0 10px rgba(0, 212, 170, 0.3);
+    }
+
+    .dark-mode .nav-link {
+        color: rgba(226, 232, 240, 0.8) !important;
+        transition: all 0.3s ease;
+    }
+
+    .dark-mode .nav-link.active,
+    .dark-mode .nav-link:hover {
+        color: #ff6b35 !important;
+        text-shadow: 0 0 8px rgba(255, 107, 53, 0.4);
+    }
+
+    .dark-mode footer {
+        margin-top: 3rem;
+        padding: 1.5rem 0;
+        text-align: center;
+        color: #64748b;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .dark-mode .card {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 1.2rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .dark-mode .metric-card {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 1.4rem;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        transition: all 0.3s ease;
+    }
+
+    .dark-mode .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+        border-color: rgba(0, 212, 170, 0.2);
+    }
+
+    .dark-mode .metric-card .card-body {
+        min-height: 140px;
+        color: #e2e8f0;
+    }
+
+    .dark-mode .metric-card p {
+        color: #94a3b8;
+    }
+
+    .dark-mode .card-header {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+        color: #e2e8f0;
+    }
+
+    .dark-mode .table {
+        color: #e2e8f0;
+    }
+
+    .dark-mode .table thead th {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        color: #cbd5e1;
+    }
+
+    .dark-mode .table tbody tr {
+        background: transparent;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .dark-mode .table tbody tr:hover {
+        background: rgba(0, 212, 170, 0.05);
+    }
+
+    .dark-mode .text-muted {
+        color: #94a3b8 !important;
+    }
+
+    .dark-mode .text-secondary {
+        color: #94a3b8 !important;
+    }
+
+    .dark-mode .btn-outline-primary {
+        color: #4a90e2;
+        border-color: #4a90e2;
+        background: transparent;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 0 rgba(74, 144, 226, 0.4);
+    }
+
+    .dark-mode .btn-outline-primary:hover {
+        color: #fff;
+        background: #4a90e2;
+        border-color: #4a90e2;
+        box-shadow: 0 0 20px rgba(74, 144, 226, 0.6);
+        transform: translateY(-2px);
+    }
+
+    .dark-mode .btn-outline-success {
+        color: #00d4aa;
+        border-color: #00d4aa;
+        background: transparent;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 0 rgba(0, 212, 170, 0.4);
+    }
+
+    .dark-mode .btn-outline-success:hover {
+        color: #fff;
+        background: #00d4aa;
+        border-color: #00d4aa;
+        box-shadow: 0 0 20px rgba(0, 212, 170, 0.6);
+        transform: translateY(-2px);
+    }
+
+    .dark-mode .btn-outline-info {
+        color: #ff6b35;
+        border-color: #ff6b35;
+        background: transparent;
+        transition: all 0.3s ease;
+        box-shadow: 0 0 0 rgba(255, 107, 53, 0.4);
+    }
+
+    .dark-mode .btn-outline-info:hover {
+        color: #fff;
+        background: #ff6b35;
+        border-color: #ff6b35;
+        box-shadow: 0 0 20px rgba(255, 107, 53, 0.6);
+        transform: translateY(-2px);
+    }
+
+    .dark-mode .page-header {
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        color: #e2e8f0;
+    }
+
+    .dark-mode .display-5 {
+        background: linear-gradient(135deg, #00d4aa 0%, #4a90e2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 20px rgba(0, 212, 170, 0.3);
+    }
+
+    /* Chart styling for dark mode */
+    .dark-mode #storesChart {
+        filter: brightness(1.1) contrast(1.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
+    <div>
+        <h1 class="display-5 fw-bold">Dashboard</h1>
+        <p class="text-white">Overview of stores, inventory and active stores.</p>
+    </div>
+    <div class="text-white">
+        <p class="mb-1">Today is {% now "F j, Y" %}</p>
+        <p class="mb-0">Keep track of your store performance at a glance.</p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-sm-6 col-xl-3">
+        <div class="card metric-card p-3">
+            <div class="card-body">
+                <p class="text-uppercase text-secondary mb-2">
+                    <i class="fas fa-box me-2" style="color: #00d4aa;"></i>Products
+                </p>
+                <h2 class="display-6 mb-1" style="color: #00d4aa;">{{ total_products }}</h2>
+                <p class="mb-0 text-muted">Items currently registered in the system.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card metric-card p-3">
+            <div class="card-body">
+                <p class="text-uppercase text-secondary mb-2">
+                    <i class="fas fa-shopping-cart me-2" style="color: #4a90e2;"></i>Orders
+                </p>
+                <h2 class="display-6 mb-1" style="color: #4a90e2;">{{ total_orders }}</h2>
+                <p class="mb-0 text-muted">Total orders placed across stores.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card metric-card p-3">
+            <div class="card-body">
+                <p class="text-uppercase text-secondary mb-2">
+                    <i class="fas fa-dollar-sign me-2" style="color: #00d4aa;"></i>Stores
+                </p>
+                <h2 class="display-6 mb-1" style="color: #00d4aa;">₱{{ total_stores|floatformat:2 }}</h2>
+                <p class="mb-0 text-muted">Revenue for the selected time range.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card metric-card p-3">
+            <div class="card-body">
+                <p class="text-uppercase text-secondary mb-2">
+                    <i class="fas fa-exclamation-triangle me-2" style="color: #ff6b35;"></i>Low stock
+                </p>
+                <h2 class="display-6 mb-1" style="color: #ff6b35;">{{ low_stock_products }}</h2>
+                <p class="mb-0 text-muted">Products that need restocking.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header py-3 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+                <div>
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2" style="color: #4a90e2;"></i>Store Performance
+                    </h5>
+                    <p class="text-muted mb-0">Last {{ selected_range }} days</p>
+                </div>
+                <div class="btn-group" role="group" aria-label="Date range selector">
+                    <a href="?range=7" class="btn btn-sm btn-outline-primary{% if selected_range == '7' %} active{% endif %}">7 Days</a>
+                    <a href="?range=30" class="btn btn-sm btn-outline-primary{% if selected_range == '30' %} active{% endif %}">30 Days</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="storesChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header py-3">
+                <h5 class="mb-0">
+                    <i class="fas fa-dollar-sign me-2" style="color: #ff6b35;"></i>Profit Overview
+                </h5>
+            </div>
+            <div class="card-body">
+                <h6 style="color: #00d4aa;">AgriPets Store</h6>
+                <div class="d-grid gap-2 mb-3">
+                    <a href="{% url 'store:profit' %}?store=agripet&period=today"
+                        class="btn btn-outline-primary">Today</a>
+                    <a href="{% url 'store:profit' %}?store=agripet&period=week" class="btn btn-outline-primary">This
+                        Week</a>
+                    <a href="{% url 'store:profit' %}?store=agripet&period=month" class="btn btn-outline-primary">This
+                        Month</a>
+                </div>
+                <h6 style="color: #00d4aa;">Cebuana Store</h6>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'store:profit' %}?store=cebuanapadala&period=today"
+                        class="btn btn-outline-success">Today</a>
+                    <a href="{% url 'store:profit' %}?store=cebuanapadala&period=week"
+                        class="btn btn-outline-success">This Week</a>
+                    <a href="{% url 'store:profit' %}?store=cebuanapadala&period=month"
+                        class="btn btn-outline-success">This Month</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header py-3">
+                <h5 class="mb-0">
+                    <i class="fas fa-receipt me-2" style="color: #4a90e2;"></i>Recent Orders
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Store</th>
+                            <th>Status</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recent_orders %}
+                        <tr>
+                            <td>{{ order.order_number }}</td>
+                            <td>{{ order.store.name }}</td>
+                            <td>
+                                <span class="badge"
+                                    style="background: {% if order.status == 'pending' %}#ff6b35{% elif order.status == 'completed' %}#00d4aa{% else %}#4a90e2{% endif %}; color: white;">
+                                    {{ order.get_status_display }}
+                                </span>
+                            </td>
+                            <td style="color: #00d4aa; font-weight: 600;">₱{{ order.total_amount }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">
+                                <i class="fas fa-inbox fa-2x mb-2" style="color: #64748b;"></i><br>
+                                No recent orders yet.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header py-3">
+                <h5 class="mb-0">
+                    <i class="fas fa-star me-2" style="color: #ff6b35;"></i>Latest Products
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Store</th>
+                            <th>Stock</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in latest_products %}
+                        <tr>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.store.name }}</td>
+                            <td>
+                                <span class="badge"
+                                    style="background: {% if product.stock_in_sacks > 10 %}#00d4aa{% elif product.stock_in_sacks > 0 %}#ff6b35{% else %}#dc3545{% endif %}; color: white;">
+                                    {{ product.stock_in_sacks }} sacks
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">
+                                <i class="fas fa-box-open fa-2x mb-2" style="color: #64748b;"></i><br>
+                                No products available.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Apply dark mode class to body
+        document.body.classList.add('dark-mode');
+
+        const ctx = document.getElementById('storesChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ stores_labels|safe }},
+                datasets: [{
+                    label: 'Stores',
+                    data: {{ stores_values|safe }},
+                    backgroundColor: 'rgba(0, 212, 170, 0.15)',
+                    borderColor: 'rgba(0, 212, 170, 0.9)',
+                    borderWidth: 2,
+                    tension: 0.35,
+                    pointBackgroundColor: 'rgba(0, 212, 170, 1)',
+                    pointBorderColor: '#0f172a',
+                    pointRadius: 4,
+                    fill: true,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#94a3b8'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#94a3b8'
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
