@@ -132,13 +132,16 @@ STATICFILES_DIRS = [
 
 # WhiteNoise: compressed & cached static files in production
 STORAGES = {
-    'default': {
-        'BACKEND': 'cloudinary_storage.storage.MediaCloudinaryStorage',
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
-    'staticfiles': {
-        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',  # 👈 changed from CompressedManifestStaticFilesStorage
+    "staticfiles": {
+        "BACKEND": "cloudinary_storage.storage.StaticCloudinaryStorage",
     },
 }
+
+# Compatibility shim for django-cloudinary-storage 0.3.0
+STATICFILES_STORAGE = "cloudinary_storage.storage.StaticCloudinaryStorage"
 
 # Media files (User uploads - Product images, payment proofs, etc.)
 # https://docs.djangoproject.com/en/6.0/topics/files/
