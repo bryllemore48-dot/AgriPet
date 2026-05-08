@@ -1,0 +1,271 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}{{ title }} | {% trans "Django Admin" %}{% endblock %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <style>
+    /* ── layout ── */
+    .sd-page   { padding: 20px; }
+    .sd-header { display:flex; flex-wrap:wrap; justify-content:space-between;
+                 align-items:flex-start; gap:12px; margin-bottom:24px; }
+    .sd-header h1 { margin:0 0 4px; font-size:1.6rem; }
+    .sd-header p  { margin:0; color:#666; }
+
+    /* ── stat cards ── */
+    .sd-cards   { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+                  gap:16px; margin-bottom:24px; }
+    .sd-card    { background:#fff; border:1px solid #ddd; border-radius:6px; padding:20px; }
+    .sd-card h6 { text-transform:uppercase; font-size:.72rem; letter-spacing:.06em;
+                  color:#888; margin:0 0 10px; }
+    .sd-card .big-num { font-size:1.9rem; font-weight:700; margin:0 0 4px; }
+    .sd-card .sub     { font-size:.82rem; color:#888; margin:0; }
+
+    /* ── badge counters in stock-summary card ── */
+    .sd-summary-row { display:flex; justify-content:space-between;
+                      align-items:center; padding:6px 0;
+                      border-bottom:1px solid #f0f0f0; }
+    .sd-summary-row:last-child { border-bottom:none; }
+    .badge-pill { padding:3px 11px; border-radius:999px; font-size:.78rem;
+                  font-weight:600; color:#fff; }
+    .badge-green  { background:#2e7d32; }
+    .badge-yellow { background:#f57c00; }
+    .badge-red    { background:#c62828; }
+
+    /* ── tables section ── */
+    .sd-tables  { display:grid; grid-template-columns:repeat(auto-fit,minmax(380px,1fr));
+                  gap:16px; }
+    .sd-table-card { background:#fff; border:1px solid #ddd; border-radius:6px;
+                     overflow:hidden; }
+    .sd-table-card .card-head { padding:14px 18px; border-bottom:1px solid #eee; }
+    .sd-table-card .card-head h5 { margin:0 0 2px; font-size:1rem; }
+    .sd-table-card .card-head p  { margin:0; font-size:.8rem; color:#888; }
+
+    table.sd-table { width:100%; border-collapse:collapse; font-size:.86rem; }
+    table.sd-table thead th { background:#f7f7f7; padding:8px 12px;
+                               text-align:left; font-weight:600; color:#444; }
+    table.sd-table tbody td { padding:8px 12px; border-top:1px solid #f0f0f0; }
+    table.sd-table tbody tr:hover td { background:#fafafa; }
+    .empty-row td { color:#aaa; text-align:center; padding:20px !important; }
+  </style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+  &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+  &rsaquo; <a href="{% url 'admin:store_store_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+  &rsaquo; {{ store.name }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="sd-page">
+
+  {# ── page header ── #}
+  <div class="sd-header">
+    <div>
+      <h1>{{ store.name }}</h1>
+      {% if is_product_store %}
+        <p>Detailed view for {{ store.name }} with inventory, weekly profit, and stock status.</p>
+      {% else %}
+        <p>Detailed view for {{ store.name }} with service transactions and weekly summary.</p>
+      {% endif %}
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <a class="button" href="{% url 'admin:store_store_changelist' %}">← Back to Stores</a>
+    </div>
+  </div>
+
+  {# ── stat cards ── #}
+  <div class="sd-cards">
+
+    {% if is_product_store %}
+
+      {# This Week Profit #}
+      <div class="sd-card">
+        <h6>This Week Profit</h6>
+        <p class="big-num">&#8369;{{ total_profit_week|floatformat:2 }}</p>
+        <p class="sub">Completed sales from {{ week_start|date:'M j' }} to {{ today|date:'M j' }}.</p>
+      </div>
+
+      {# Stock summary #}
+      <div class="sd-card">
+        <h6>Stock Summary</h6>
+        <div class="sd-summary-row">
+          <span>In stock</span>
+          <span class="badge-pill badge-green">{{ in_stock }}</span>
+        </div>
+        <div class="sd-summary-row">
+          <span>Low stock</span>
+          <span class="badge-pill badge-yellow">{{ low_stock }}</span>
+        </div>
+        <div class="sd-summary-row">
+          <span>Out of stock</span>
+          <span class="badge-pill badge-red">{{ out_of_stock }}</span>
+        </div>
+      </div>
+
+      {# Inventory count #}
+      <div class="sd-card">
+        <h6>Inventory Count</h6>
+        <p class="big-num">{{ total_products }}</p>
+        <p class="sub">Active and archived products in this store.</p>
+      </div>
+
+    {% else %}
+
+      {# This Week Amount #}
+      <div class="sd-card">
+        <h6>This Week Amount</h6>
+        <p class="big-num">&#8369;{{ total_amount_week|floatformat:2 }}</p>
+        <p class="sub">Processed transactions from {{ week_start|date:'M j' }} to {{ today|date:'M j' }}.</p>
+      </div>
+
+      {# Transaction summary #}
+      <div class="sd-card">
+        <h6>Transaction Summary</h6>
+        <div class="sd-summary-row">
+          <span>Completed</span>
+          <span class="badge-pill badge-green">{{ completed }}</span>
+        </div>
+        <div class="sd-summary-row">
+          <span>Pending</span>
+          <span class="badge-pill badge-yellow">{{ pending }}</span>
+        </div>
+        <div class="sd-summary-row">
+          <span>Failed</span>
+          <span class="badge-pill badge-red">{{ failed }}</span>
+        </div>
+      </div>
+
+      {# Total transactions #}
+      <div class="sd-card">
+        <h6>Total Transactions</h6>
+        <p class="big-num">{{ total_transactions }}</p>
+        <p class="sub">All service transactions for this store.</p>
+      </div>
+
+    {% endif %}
+  </div>{# /sd-cards #}
+
+  {# ── two-column tables ── #}
+  <div class="sd-tables">
+
+    {# Left table #}
+    <div class="sd-table-card">
+      <div class="card-head">
+        {% if is_product_store %}
+          <h5>Inventory Overview</h5>
+        {% else %}
+          <h5>Service Transactions</h5>
+        {% endif %}
+      </div>
+      <table class="sd-table">
+        <thead>
+          <tr>
+            {% if is_product_store %}
+              <th>Product</th><th>Category</th><th>Price</th><th>Stock</th><th>Status</th>
+            {% else %}
+              <th>Type</th><th>Reference</th><th>Customer</th><th>Amount</th><th>Status</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% if is_product_store %}
+            {% for product in products %}
+            <tr>
+              <td>{{ product.name }}</td>
+              <td>{{ product.get_category_display }}</td>
+              <td>&#8369;{{ product.price_per_kilo }} / kg</td>
+              <td>{{ product.stock_in_sacks }} sacks</td>
+              <td>
+                {% if product.stock_status == 'in_stock' %}
+                  <span class="badge-pill badge-green">{{ product.stock_label }}</span>
+                {% elif product.stock_status == 'low_stock' %}
+                  <span class="badge-pill badge-yellow">{{ product.stock_label }}</span>
+                {% else %}
+                  <span class="badge-pill badge-red">{{ product.stock_label }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr class="empty-row"><td colspan="5">No products found for this store.</td></tr>
+            {% endfor %}
+          {% else %}
+            {% for transaction in service_transactions %}
+            <tr>
+              <td>{{ transaction.get_transaction_type_display }}</td>
+              <td>{{ transaction.reference_number }}</td>
+              <td>{{ transaction.customer_name }}</td>
+              <td>&#8369;{{ transaction.amount|floatformat:2 }}</td>
+              <td>
+                {% if transaction.status == 'completed' %}
+                  <span class="badge-pill badge-green">{{ transaction.get_status_display }}</span>
+                {% elif transaction.status == 'pending' %}
+                  <span class="badge-pill badge-yellow">{{ transaction.get_status_display }}</span>
+                {% else %}
+                  <span class="badge-pill badge-red">{{ transaction.get_status_display }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr class="empty-row"><td colspan="5">No transactions found for this store.</td></tr>
+            {% endfor %}
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    {# Right table – weekly #}
+    <div class="sd-table-card">
+      <div class="card-head">
+        <h5>Weekly Transactions</h5>
+        {% if is_product_store %}
+          <p>Showing up to the latest 12 completed orders.</p>
+        {% else %}
+          <p>Showing up to the latest 12 transactions.</p>
+        {% endif %}
+      </div>
+      <table class="sd-table">
+        <thead>
+          <tr>
+            {% if is_product_store %}
+              <th>Order</th><th>Date</th><th>Status</th><th>Total</th>
+            {% else %}
+              <th>Type</th><th>Reference</th><th>Date</th><th>Amount</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% if is_product_store %}
+            {% for order in weekly_orders %}
+            <tr>
+              <td>{{ order.order_number }}</td>
+              <td>{{ order.created_at|date:'M j, Y' }}</td>
+              <td>{{ order.get_status_display }}</td>
+              <td>&#8369;{{ order.total_amount|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr class="empty-row"><td colspan="4">No completed orders this week.</td></tr>
+            {% endfor %}
+          {% else %}
+            {% for transaction in weekly_transactions %}
+            <tr>
+              <td>{{ transaction.get_transaction_type_display }}</td>
+              <td>{{ transaction.reference_number }}</td>
+              <td>{{ transaction.created_at|date:'M j, Y' }}</td>
+              <td>&#8369;{{ transaction.amount|floatformat:2 }}</td>
+            </tr>
+            {% empty %}
+            <tr class="empty-row"><td colspan="4">No transactions this week.</td></tr>
+            {% endfor %}
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>{# /sd-tables #}
+</div>{# /sd-page #}
+{% endblock %}
