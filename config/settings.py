@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',  # 👈 add this ABOVE django.contrib.staticfiles
     'django.contrib.staticfiles',
+    'cloudinary',  
     'store',
 ]
 
@@ -141,8 +143,16 @@ STORAGES = {
 # Media files (User uploads - Product images, payment proofs, etc.)
 # https://docs.djangoproject.com/en/6.0/topics/files/
 
-MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# MEDIA_URL = 'media/'
+# MEDIA_ROOT = BASE_DIR / 'media'
+
+import os
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('daowwdnx0'),
+    'API_KEY': os.environ.get('477363789913732'),
+    'API_SECRET': os.environ.get('CY2KL2YYdkmomaWrUEPmTuTXMAU'),
+}
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # Email settings for notifications
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
