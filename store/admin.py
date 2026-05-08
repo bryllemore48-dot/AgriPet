@@ -133,6 +133,11 @@ class ProductAdmin(admin.ModelAdmin):
         }),
     )
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'store':
+            kwargs['queryset'] = Store.objects.filter(store_type=Store.AGRIPET)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def has_delete_permission(self, request, obj=None):
         return request.user.is_superuser
 
@@ -173,6 +178,11 @@ class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemInline, PaymentProofInline]
     readonly_fields = ('order_number', 'created_at', 'updated_at')
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'store':
+            kwargs['queryset'] = Store.objects.filter(store_type=Store.AGRIPET)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
     def store_link(self, obj):
         url = reverse('store:store_detail', args=[obj.store.store_type])
         return format_html('<a href="{}">{}</a>', url, obj.store.name)
@@ -184,6 +194,11 @@ class ServiceTransactionAdmin(admin.ModelAdmin):
     list_filter = ('store', 'transaction_type', 'status', 'created_at')
     search_fields = ('reference_number', 'customer_name')
     readonly_fields = ('created_at',)
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'store':
+            kwargs['queryset'] = Store.objects.filter(store_type=Store.LIVESTOCK)
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class UserProfileAdmin(admin.ModelAdmin):
