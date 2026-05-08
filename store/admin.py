@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.urls import reverse
+from django.utils.html import format_html
 from .models import Store, Product, Customer, Order, OrderItem, PaymentProof, Staff, Attendance, UserProfile
 
 
@@ -67,11 +69,16 @@ class PaymentProofInline(admin.StackedInline):
 
 
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('order_number', 'store', 'status', 'total_amount', 'created_at')
+    list_display = ('order_number', 'store_link', 'status', 'total_amount', 'created_at')
     list_filter = ('status', 'store', 'created_at')
     search_fields = ('order_number',)
     inlines = [OrderItemInline, PaymentProofInline]
     readonly_fields = ('order_number', 'created_at', 'updated_at')
+
+    def store_link(self, obj):
+        url = reverse('store:store_detail', args=[obj.store.store_type])
+        return format_html('<a href="{}">{}</a>', url, obj.store.name)
+    store_link.short_description = 'Store'
 
 
 class UserProfileAdmin(admin.ModelAdmin):

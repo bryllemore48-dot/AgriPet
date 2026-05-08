@@ -15,7 +15,7 @@ class Store(models.Model):
     ]
 
     name = models.CharField(max_length=120, editable=False)
-    store_type = models.CharField(max_length=16, choices=STORE_TYPE_CHOICES)
+    store_type = models.CharField(max_length=16, choices=STORE_TYPE_CHOICES, unique=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
