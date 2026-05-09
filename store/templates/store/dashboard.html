@@ -129,45 +129,93 @@
                 
                 <div class="row g-4">
                     {% for item in store_profits_list %}
-                    <div class="col-md-6">
-                        <div class="card border-light bg-light h-100">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="col-md-12 mb-4">
+                        <div class="card border-0 bg-light shadow-sm rounded-4 h-100">
+                            
+                            <div class="card-body p-4">
+
+                                <!-- Header -->
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+
                                     <div>
-                                        <h6 class="mb-1 fw-bold">{{ item.store.name }}</h6>
-                                        <p class="text-muted mb-0 small">Total Profit</p>
+                                        <h5 class="fw-bold mb-1">
+                                            {{ item.store.name }}
+                                        </h5>
+
+                                        <small class="text-muted">
+                                            Total Profit
+                                        </small>
                                     </div>
-                                    <h5 class="mb-0 text-success fw-bold">₱{{ item.profit|floatformat:2 }}</h5>
+
+                                    <div class="text-end">
+                                       <h4 class="mb-0 text-success fw-bold"
+                                            id="profit-amount-{{ item.store.name|slugify }}">
+                                            ₱{{ item.profit|floatformat:2 }}
+                                        </h4>
+                                    </div>
+
                                 </div>
-                                
-                                <!-- Progress Bar -->
-                                <div class="progress mb-3" style="height: 6px;">
-                                    {% if max_profit > 0 %}
-                                        {% widthratio item.profit max_profit 100 as progress_width %}
-                                        <div class="progress-bar {% if forloop.counter == 1 %}bg-success{% else %}bg-info{% endif %}" 
-                                             role="progressbar" 
-                                             style="width: {{ progress_width }}%" 
-                                             aria-valuenow="{{ progress_width }}" 
-                                             aria-valuemin="0" 
-                                             aria-valuemax="100">
-                                        </div>
-                                    {% else %}
-                                        <div class="progress-bar {% if forloop.counter == 1 %}bg-success{% else %}bg-info{% endif %}" 
-                                             role="progressbar" 
-                                             style="width: 0%" 
-                                             aria-valuenow="0" 
-                                             aria-valuemin="0" 
-                                             aria-valuemax="100">
-                                        </div>
-                                    {% endif %}
+
+                                <!-- Progress Section -->
+                                <div class="mb-4">
+
+                                    <div class="progress rounded-pill"
+                                        style="height: 8px; background-color: #dee2e6;">
+
+                                        {% if max_profit > 0 %}
+                                            {% widthratio item.profit max_profit 100 as progress_width %}
+
+                                           <div class="progress-bar 
+                                                {% if forloop.counter == 1 %}
+                                                    bg-success
+                                                {% else %}
+                                                    bg-info
+                                                {% endif %}"
+                                                id="profit-bar-{{ item.store.name|slugify }}"
+                                                role="progressbar"
+                                                style="width: {{ progress_width }}%"
+                                                aria-valuenow="{{ progress_width }}"
+                                                aria-valuemin="0"
+                                                aria-valuemax="100">
+                                            </div>
+
+                                        {% else %}
+
+                                            <div class="progress-bar bg-secondary"
+                                                style="width: 0%">
+                                            </div>
+
+                                        {% endif %}
+                                    </div>
+
                                 </div>
-                                
-                                <!-- Period Tabs -->
-                                <div class="btn-group btn-group-sm w-100" role="group" aria-label="Profit period selector">
-                                    <button type="button" class="btn btn-outline-secondary btn-sm active" aria-pressed="true">Today</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" aria-pressed="false">This Week</button>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" aria-pressed="false">This Month</button>
-                                </div>
+
+                                <!-- Tabs -->
+                               <div class="mt-3">
+                                    <div class="btn-group w-100 rounded-3 overflow-hidden shadow-sm"
+                                        role="group"
+                                        aria-label="Profit period selector">
+
+                                        <button type="button"
+                                                class="btn btn-sm py-2 fw-medium profit-tab {% if profit_period == 'today' or not profit_period %}btn-light active{% else %}btn-outline-secondary{% endif %}"
+                                                data-period="today">
+                                            Today
+                                        </button>
+
+                                        <button type="button"
+                                                class="btn btn-sm py-2 fw-medium profit-tab {% if profit_period == 'week' %}btn-light active{% else %}btn-outline-secondary{% endif %}"
+                                                data-period="week">
+                                            This Week
+                                        </button>
+
+                                        <button type="button"
+                                                class="btn btn-sm py-2 fw-medium profit-tab {% if profit_period == 'month' %}btn-light active{% else %}btn-outline-secondary{% endif %}"
+                                                data-period="month">
+                                            This Month
+                                        </button>
+
+                                    </div>
+                               </div>
                             </div>
                         </div>
                     </div>
@@ -296,7 +344,7 @@
         const gradient = ctx.createLinearGradient(0, 0, 0, 420);
         gradient.addColorStop(0, 'rgba(13, 110, 253, 0.28)');
         gradient.addColorStop(1, 'rgba(13, 110, 253, 0.02)');
-
+    
         new Chart(ctx, {
             type: 'line',
             data: {
@@ -347,21 +395,39 @@
             }
         });
 
-        // Make the Profit Overview period buttons interactive and accessible.
-        const profitGroups = document.querySelectorAll('.btn-group[aria-label="Profit period selector"]');
-        profitGroups.forEach(group => {
-            const buttons = group.querySelectorAll('button');
-            buttons.forEach(button => {
-                button.addEventListener('click', () => {
-                    buttons.forEach(btn => {
-                        btn.classList.remove('active');
-                        btn.setAttribute('aria-pressed', 'false');
-                    });
-                    button.classList.add('active');
-                    button.setAttribute('aria-pressed', 'true');
+        // Profit period buttons — AJAX no refresh
+        document.querySelectorAll('.profit-tab').forEach(button => {
+            button.addEventListener('click', function () {
+                const period = this.getAttribute('data-period');
+                if (!period) return;
+
+                // Update active button style
+                document.querySelectorAll('.profit-tab').forEach(btn => {
+                    btn.classList.remove('active', 'btn-light');
+                    btn.classList.add('btn-outline-secondary');
                 });
+                this.classList.add('active', 'btn-light');
+                this.classList.remove('btn-outline-secondary');
+
+                // Fetch new profit data
+                fetch(`/profit-overview/?profit_period=${period}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.store_profits_list.forEach(item => {
+                            const slug = item.store_name.replace(/\s+/g, '-').toLowerCase();
+                            const profitEl = document.getElementById(`profit-amount-${slug}`);
+                            const barEl = document.getElementById(`profit-bar-${slug}`);
+
+                            if (profitEl) profitEl.textContent = `₱${item.profit.toFixed(2)}`;
+                            if (barEl) {
+                                const width = data.max_profit > 0 ? (item.profit / data.max_profit) * 100 : 0;
+                                barEl.style.width = `${width}%`;
+                            }
+                        });
+                    });
             });
         });
     });
 </script>
+
 {% endblock %}

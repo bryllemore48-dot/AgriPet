@@ -14,6 +14,8 @@ from reportlab.lib import colors
 from reportlab.lib.units import inch
 from .models import Store, Product, Order, Attendance, UserProfile, Customer, ServiceTransaction
 from .forms import UserForm, UserProfileForm
+from django.http import JsonResponse
+
 @login_required
 def dashboard(request):
     selected_range = request.GET.get('range', '7')
@@ -55,25 +57,37 @@ def dashboard(request):
 
     # Calculate profit overview by store and period
     today = datetime.now().date()
-    month_start = today.replace(day=1)
-    next_month = (month_start.replace(day=28) + timedelta(days=4)).replace(day=1)
-    month_end = next_month - timedelta(days=1)
-    
-    # Calculate profit for each store (this month)
+    profit_period = request.GET.get('profit_period', 'today')
+
+    if profit_period == 'today':
+        profit_start = today
+        profit_end = today
+    elif profit_period == 'week':
+        profit_start = today - timedelta(days=6)
+        profit_end = today
+    elif profit_period == 'month':
+        profit_start = today.replace(day=1)
+        next_month = (profit_start.replace(day=28) + timedelta(days=4)).replace(day=1)
+        profit_end = next_month - timedelta(days=1)
+    else:
+        profit_start = today
+        profit_end = today
+
     store_profits_list = []
     max_profit = 0
-    for store in stores:
+    for store in stores.exclude(name="Cebuana Padala"):
         store_profit = Order.objects.filter(
             store=store,
             status=Order.STATUS_COMPLETED,
-            created_at__date__gte=month_start,
-            created_at__date__lte=today,
+            created_at__date__gte=profit_start,
+            created_at__date__lte=profit_end,
         ).aggregate(Sum('total_amount'))['total_amount__sum'] or 0
         store_profits_list.append({
             'store': store,
             'profit': store_profit,
         })
         max_profit = max(max_profit, store_profit)
+
 
     context = {
         'stores': stores,
@@ -92,6 +106,7 @@ def dashboard(request):
         'selected_range': selected_range,
         'store_profits_list': store_profits_list,
         'max_profit': max_profit,
+        'profit_period': profit_period,
     }
     return render(request, 'store/dashboard.html', context)
 
@@ -550,6 +565,47 @@ def profit(request):
         'end_date': end_date,
     }
     return render(request, 'store/profit.html', context)
+
+@login_required
+def profit_overview(request):
+    today = datetime.now().date()
+    profit_period = request.GET.get('profit_period', 'today')
+
+    if profit_period == 'today':
+        profit_start = today
+        profit_end = today
+    elif profit_period == 'week':
+        profit_start = today - timedelta(days=6)
+        profit_end = today
+    elif profit_period == 'month':
+        profit_start = today.replace(day=1)
+        next_month = (profit_start.replace(day=28) + timedelta(days=4)).replace(day=1)
+        profit_end = next_month - timedelta(days=1)
+    else:
+        profit_start = today
+        profit_end = today
+
+    stores = Store.objects.exclude(name="Cebuana Padala")
+    store_profits_list = []
+    max_profit = 0
+
+    for store in stores:
+        store_profit = Order.objects.filter(
+            store=store,
+            status=Order.STATUS_COMPLETED,
+            created_at__date__gte=profit_start,
+            created_at__date__lte=profit_end,
+        ).aggregate(Sum('total_amount'))['total_amount__sum'] or 0
+        store_profits_list.append({
+            'store_name': store.name,
+            'profit': float(store_profit),
+        })
+        max_profit = max(max_profit, float(store_profit))
+
+    return JsonResponse({
+        'store_profits_list': store_profits_list,
+        'max_profit': max_profit,
+    })
 
 
 def register(request):
